@@ -10,125 +10,114 @@ function init() {
     d3.json(url).then(function(data) {
         console.log(data);
         var names = data.names;
+        console.log(names)
         names.forEach(function(id) {
             initDropdown = d3.selectAll("#selDataset")
                 .append("option")
                 .text(id)
-                .property("value");
+                .property("value", id);
         });
 
-
-        var dataset = names[0];
-        var values = (data.samples[0].sample_values)
-        var ids = (data.samples[0].otu_ids)
-        var labels = (data.samples[0].otu_labels)
-
-        var metaId = data.metadata[0].id
-        var metaEthni = data.metadata[0].ethnicity
-        var metaGender = data.metadata[0].gender
-        var metaAge = data.metadata[0].age
-        var metaLocation = data.metadata[0].location
-        var metaBbtype = data.metadata[0].bbtype
-        var metaWfreq = data.metadata[0].wfreq
-
-        buildPlot(dataset, values, ids, labels, metaId, metaEthni, metaGender, metaAge, metaLocation, metaBbtype, metaWfreq)
-
-    })
+        var firstName = names[0];
+        buildPlots(firstName);
+        buildMetadata(firstName);
+    });
 }
 
-function optionchanged() {
-    var dropdownMenu = d3.select("#selDataset");
-    var dataset = dropdownMenu.property("value");
+function optionchanged(value) {
+    // console.log(`dataset is: ${value}`)
 
-    console.log(`dataset is: ${dataset}`)
+    buildPlots(value);
+    buildMetadata(value);
+}
 
 
-    d3.json("url").then(function(data) {
+function buildMetadata(name) {
+    d3.json(url).then(function(data) {
+        console.log(data)
+        var dataSet = data.metadata.filter(item => item.id == name);
+        var result = dataSet[0];
 
-        var i
-        for (i = 0; i < data.samples.length; i++) {
-            if (data.samples[i].id === dataset) {
-                var index = i
+        var meta = d3.select("#sample-metadata");
 
-                var values = (data.samples[i].sample_value)
-                var ids = (data.samples[i].otu_ids)
-                var labels = (data.samples[i].otu_labels)
+        // Use `.html("") 
+        meta.html("");
 
-                var metaId = data.metadata[i].id
-                var metaEthni = data.metadata[i].ethnicity
-                var metaGender = data.metadata[i].gender
-                var metaAge = data.metadata[i].age
-                var metaLocation = data.metadata[i].location
-                var metaBbtype = data.metadata[i].bbtype
-                var metaWfreq = data.metadata[i].wfreq
+        Object.entries(result).forEach(([key, value]) => {
+            meta.append("h6").text(`${key.toUpperCase()}: ${value}`);
+        });
+    });
+}
 
+
+function buildPlots(name) {
+    d3.json(url).then(function(data) {
+        console.log(data);
+        var dataSet = data.samples.filter(item => item.id == name);
+        var result = dataSet[0];
+
+
+        var values = result.sample_value;
+        var ids = result.otu_ids;
+        var labels = result.otu_labels;
+
+
+        // Build a Bubble Chart
+        var trace = {
+            x: ids,
+            y: values,
+            text: labels,
+            mode: "markers",
+            marker: {
+                size: values,
+                color: ids,
+                colorscale: "Earth"
             }
-        }
+        };
 
-        buildPlot(dataset, values, ids, labels, metaId, metaEthni, metaGender, metaAge, metaLocation, metaBbtype, metaWfreq)
+        var data = [trace];
+
+        var layout = {
+            title: "Bacteria Cultures Per Sample",
+            margin: { t: 0 },
+            hovermode: "closest",
+            xaxis: { title: "OTU ID" },
+            margin: { t: 30 }
+        };
+
+        Plotly.newPlot("bubble", data, layout);
+
+        // Build Bar chart
+
+        var yticks = ids.slice(0, 10).map(otu => `OTU ${otu}`).reverse();
+        var trace1 = {
+            type: 'bar',
+            orientation: 'h',
+            x: values.slice(0, 10).reverse(),
+            text: labels.slice(0, 10).reverse(),
+            y: yticks
+
+        };
+
+        var data1 = [trace1];
+
+        var layout1 = {
+            title: "Top 10 Bacteria",
+            margin: { t: 30, l: 150 },
+            yaxis: { title: "otu_ids" }
+
+        };
+
+        Plotly.newPlot('bar', data1, layout1)
+
+
+        console.log('building plot')
+
     });
 
 }
 
-
-function buildPlot(dataset, values, ids, labels, metaId, metaEthni, metaGender, metaAge, metaLocation, metaBbtype, metaWfreq) {
-
-    console.log('building plot')
-
-
-    var trace1 = {
-        type: 'bar',
-        orientation: 'h',
-        x: values.slice(0, 10),
-        y: ids.slice(0, 10),
-        text: labels.slice(0, 10),
-
-    };
-
-    var data1 = [trace1];
-
-    // var layout1 = {
-    //     title:
-
-    // };
-
-    Plotly.newPlot('bar', data1)
-
-
-    var trace2 = {
-        x: ids,
-        y: values,
-        // text = labels,
-        mode: 'markers',
-        marker: {
-            color: ids,
-            size: values
-
-        }
-    }
-
-    var data2 = [trace2];
-
-
-
-    // };
-
-    // // var layout = {
-
-    // // }
-
-
-    // Plotly.newPlot('bubble', data2)
-
-}
-
-init()
-
-const dataPromise = d3.json("url")
-console.log('Data promise:', dataPromise);
-
-
-
+init();
 
 
 // function buildPlot(name){
@@ -139,3 +128,4 @@ console.log('Data promise:', dataPromise);
 //     //build MetaData here
 //     meta = d3.select("#sample-metadata")
 // };
+// var ids = toString(dataset.otu_ids)
