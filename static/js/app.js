@@ -4,7 +4,7 @@ console.log(url)
 
 
 function init() {
-    //initialize the two above functions with a starter value
+    //initialize the two functions with a starter value
     // var dropdownMenu = d3.select("#selDataset")
 
     d3.json(url).then(function(data) {
@@ -24,11 +24,11 @@ function init() {
     });
 }
 
-function optionchanged(value) {
+function optionchanged(newValue) {
     // console.log(`dataset is: ${value}`)
 
-    buildPlots(value);
-    buildMetadata(value);
+    buildPlots(newValue);
+    buildMetadata(newValue);
 }
 
 
@@ -75,43 +75,43 @@ function buildPlots(name) {
             }
         };
 
-        var data = [trace];
+        var bubbleData = [trace];
 
         var layout = {
             title: "Bacteria Cultures Per Sample",
-            margin: { t: 0 },
-            hovermode: "closest",
+            width: "1100",
+            height: "600",
             xaxis: { title: "OTU ID" },
-            margin: { t: 30 }
+            yaxis: { title: "Sample Amount" }
+
         };
 
-        Plotly.newPlot("bubble", data, layout);
+        Plotly.newPlot("bubble", bubbleData, layout);
 
         // Build Bar chart
 
         var yticks = ids.slice(0, 10).map(otu => `OTU ${otu}`).reverse();
+
         var trace1 = {
             type: 'bar',
             orientation: 'h',
-            x: values.slice(0, 10).reverse(),
-            text: labels.slice(0, 10).reverse(),
+            x: values,
+            text: labels,
             y: yticks
 
         };
 
-        var data1 = [trace1];
+        var barData = [trace1];
 
         var layout1 = {
             title: "Top 10 Bacteria",
             margin: { t: 30, l: 150 },
-            yaxis: { title: "otu_ids" }
+            yaxis: { title: "OTU IDs" }
 
         };
 
-        Plotly.newPlot('bar', data1, layout1)
+        Plotly.newPlot('bar', barData, layout1)
 
-
-        console.log('building plot')
 
     });
 
@@ -120,12 +120,8 @@ function buildPlots(name) {
 init();
 
 
-// function buildPlot(name){
-//     //build plots here
-//     bar = d3.select("#bar");
-// };
-// function buildMetaData(name){
-//     //build MetaData here
-//     meta = d3.select("#sample-metadata")
-// };
 // var ids = toString(dataset.otu_ids)
+//x: values.slice(0, 10).reverse(),
+//text: labels.slice(0, 10).reverse(),
+
+// var config = { responsive: true };
