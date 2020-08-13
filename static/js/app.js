@@ -19,14 +19,14 @@ function init() {
         });
 
         var firstName = names[0];
-        buildPlots(firstName);
-        buildMetadata(firstName);
+        console.log(names[0])
+        buildPlots("940");
+        buildMetadata("940");
     });
 }
 
-function optionchanged(newValue) {
-    // console.log(`dataset is: ${value}`)
-
+function optionChanged(newValue) {
+    console.log("new value", newValue)
     buildPlots(newValue);
     buildMetadata(newValue);
 }
@@ -50,16 +50,15 @@ function buildMetadata(name) {
 }
 
 
-function buildPlots(name) {
+function buildPlots(sampleName) {
     d3.json(url).then(function(data) {
-        console.log(data);
-        var dataSet = data.samples.filter(item => item.id == name);
-        var result = dataSet[0];
+        console.log("this is buildplot", data, "sample name", sampleName);
+        var dataSet = data.samples.filter(item => item.id == sampleName);
+        console.log("data set", dataSet)
 
-
-        var values = result.sample_value;
-        var ids = result.otu_ids;
-        var labels = result.otu_labels;
+        var values = dataSet[0].sample_values;
+        var ids = dataSet[0].otu_ids;
+        var labels = dataSet[0].otu_labels;
 
 
         // Build a Bubble Chart
@@ -89,14 +88,20 @@ function buildPlots(name) {
         Plotly.newPlot("bubble", bubbleData, layout);
 
         // Build Bar chart
+        // console.log("yticks", yticks)
+        console.log("id", ids)
+
 
         var yticks = ids.slice(0, 10).map(otu => `OTU ${otu}`).reverse();
+        console.log("yticks", yticks)
+        console.log("id", ids)
+
 
         var trace1 = {
             type: 'bar',
             orientation: 'h',
-            x: values,
-            text: labels,
+            x: values.slice(0, 10).reverse(),
+            text: labels.slice(0, 10).reverse(),
             y: yticks
 
         };
