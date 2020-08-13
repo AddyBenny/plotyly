@@ -123,10 +123,3 @@ function buildPlots(sampleName) {
 }
 
 init();
-
-
-// var ids = toString(dataset.otu_ids)
-//x: values.slice(0, 10).reverse(),
-//text: labels.slice(0, 10).reverse(),
-
-// var config = { responsive: true };
